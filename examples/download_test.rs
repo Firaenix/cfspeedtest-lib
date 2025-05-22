@@ -1,14 +1,16 @@
-use cfspeedtest::speedtest::test_download;
-use cfspeedtest::OutputFormat;
+use cfspeedtest_lib::speedtest::{test_download, PayloadSize};
+use cfspeedtest_lib::OutputFormat;
 
 fn main() {
-    println!("Testing download speed with 10MB of payload");
-
-    let download_speed = test_download(
-        &reqwest::blocking::Client::new(),
-        10_000_000,
-        OutputFormat::None, // don't write to stdout while running the test
-    );
-
-    println!("download speed in mbit: {download_speed}")
+    // Initialize tracing for logging
+    tracing_subscriber::fmt::init();
+    
+    println!("Running download test...");
+    
+    let client = reqwest::blocking::Client::new();
+    let payload_size = PayloadSize::M10.clone() as usize;
+    
+    let mbits = test_download(&client, payload_size, OutputFormat::None);
+    
+    println!("\nDownload speed: {:.2} mbit/s", mbits);
 }

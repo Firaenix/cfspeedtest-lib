@@ -1,19 +1,19 @@
-use cfspeedtest::speedtest::run_latency_test;
-use cfspeedtest::OutputFormat;
+use cfspeedtest_lib::speedtest::run_latency_test;
+use cfspeedtest_lib::OutputFormat;
 
 fn main() {
-    println!("Testing latency");
-
-    let (latency_results, avg_latency) = run_latency_test(
-        &reqwest::blocking::Client::new(),
-        25,
-        OutputFormat::None, // don't write to stdout while running the test
-    );
-
-    println!("average latancy in ms: {avg_latency}");
-
-    println!("all latency test results");
-    for latency_result in latency_results {
-        println!("latency in ms: {latency_result}");
+    // Initialize tracing for logging
+    tracing_subscriber::fmt::init();
+    
+    println!("Running latency test...");
+    
+    let client = reqwest::blocking::Client::new();
+    let (measurements, avg) = run_latency_test(&client, 20, OutputFormat::None);
+    
+    println!("\nLatency Results:");
+    println!("Average latency: {:.2} ms", avg);
+    println!("All measurements (ms):");
+    for (i, measurement) in measurements.iter().enumerate() {
+        println!("Test {}: {:.2} ms", i + 1, measurement);
     }
 }

@@ -4,6 +4,7 @@ use crate::OutputFormat;
 use indexmap::IndexSet;
 use serde::Serialize;
 use std::{fmt::Display, io};
+use tracing::debug;
 
 #[derive(Serialize)]
 struct StatMeasurement {
@@ -43,8 +44,8 @@ pub(crate) fn log_measurements(
     output_format: OutputFormat,
 ) {
     if output_format == OutputFormat::StdOut {
-        println!("\nSummary Statistics");
-        println!("Type     Payload |  min/max/avg in mbit/s");
+        debug!("Summary Statistics");
+        debug!("Type     Payload |  min/max/avg in mbit/s");
     }
     let mut stat_measurements: Vec<StatMeasurement> = Vec::new();
     measurements
@@ -117,12 +118,13 @@ fn log_measurements_by_test_type(
                 avg,
             });
             if output_format == OutputFormat::StdOut {
-                println!(
-                "{fmt_test_type:<9} {formatted_payload:<7}|  min {min:<7.2} max {max:<7.2} avg {avg:<7.2}"
-            );
+                debug!(
+                    "{} {}: min {:.2} max {:.2} avg {:.2}",
+                    fmt_test_type, formatted_payload, min, max, avg
+                );
                 if verbose {
                     let plot = boxplot::render_plot(min, q1, median, q3, max);
-                    println!("{plot}\n");
+                    debug!("Boxplot: {}", plot);
                 }
             }
         }
@@ -132,7 +134,7 @@ fn log_measurements_by_test_type(
 }
 
 fn calc_stats(mbit_measurements: Vec<f64>) -> Option<(f64, f64, f64, f64, f64, f64)> {
-    log::debug!("calc_stats for mbit_measurements {mbit_measurements:?}");
+    debug!("Calculating stats for {} measurements", mbit_measurements.len());
     let length = mbit_measurements.len();
     if length == 0 {
         return None;
